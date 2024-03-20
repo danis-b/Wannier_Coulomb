@@ -4,7 +4,7 @@
 #include <vector>
 #include <array>
 #include <math.h>
-//#include <omp.h>
+#include <omp.h>
 
 void normalize(std::vector<double> &W, int n_tot)
 {
@@ -31,38 +31,48 @@ auto distance(const std::array<double, N> &a, const std::array<double, N> &b)
     return sqrt(d);
 }
 
-std::array<double, 3> compute_Coulomb(const int mc_sweeps, const size_t n_tot, std::vector<double> const &W1, std::vector<double> const &W2, std::vector<std::array<double, 3> > const &r)
+std::array<double, 3> compute_Coulomb(const int mc_steps, const size_t n_tot, std::vector<double> const &W1, std::vector<double> const &W2, std::vector<std::array<double, 3> > const &r)
 {
-    int i, j;
-    std::array<double, 3> coulomb = {0.0, 0.0, 0.0};
+    
+    double coulomb_0 = 0.0;
+    double coulomb_1 = 0.0;
+    double coulomb_2 = 0.0;
     srand(time(NULL));
-    //#pragma omp parallel for default(none) firstprivate(n_tot, i, j, W, r) reduction(+ \
-                                                                                 : coulomb_U)
-    for (auto n = size_t{0}; n < mc_sweeps; ++n)
+
+    #pragma omp parallel for default(none) shared(mc_steps, n_tot, W1, W2, r) reduction(+:coulomb_0, coulomb_1, coulomb_2)
+    for (auto n = size_t{0}; n < mc_steps; ++n)
     {
-        i = rand() % n_tot;
-        j = rand() % n_tot;
+        double local_coulomb_0 = 0.0;
+        double local_coulomb_1 = 0.0;
+        double local_coulomb_2 = 0.0;
+
+        int i = rand() % n_tot;
+        int j = rand() % n_tot;
         if (i != j)
         {
-            coulomb[0] += (W1[i] * W1[i]) * (W1[j] * W1[j]) / distance(r[i], r[j]);
-            coulomb[1] += (W1[i] * W1[i]) * (W2[j] * W2[j]) / distance(r[i], r[j]);
-            coulomb[2] += (W1[i] * W2[i]) * (W1[j] * W2[j]) / distance(r[i], r[j]);
-
+            double d_ij = distance(r[i], r[j]);
+            local_coulomb_0 += (W1[i] * W1[i]) * (W1[j] * W1[j]) / d_ij;
+            local_coulomb_1 += (W1[i] * W1[i]) * (W2[j] * W2[j]) / d_ij;
+            local_coulomb_2 += (W1[i] * W2[i]) * (W1[j] * W2[j]) / d_ij;
         }
+
+        coulomb_0 += local_coulomb_0;
+        coulomb_1 += local_coulomb_1;
+        coulomb_2 += local_coulomb_2;
     }
 
-    for(int i  = 0; i < 3; ++i){
-        coulomb[i] *= 14.3948 * (n_tot * n_tot / mc_sweeps); // e^2/R[A] to eV;
-    }
+    coulomb_0 *= 14.3948 * (n_tot * n_tot / mc_steps);
+    coulomb_1 *= 14.3948 * (n_tot * n_tot / mc_steps);
+    coulomb_2 *= 14.3948 * (n_tot * n_tot / mc_steps);
 
-    return coulomb;
+    return {coulomb_0, coulomb_1, coulomb_2};
 }
-
 
 
 int main()
 {
-    const int mc_sweeps = 1E8;
+    //set MC sweeps
+    const int mc_steps = 1E19;
     int n_tot, n_tot_new, a, b, c;
     int n_size[3];
     double origin[3];
@@ -86,7 +96,7 @@ int main()
     std::cout << "Program Wannier_Hund.x v.2.0 starts on " << ctime(&td);
     std::cout << "=====================================================================" << std::endl;
 
-    std::cout << "mc_sweeps: " << mc_sweeps << std::endl;
+    std::cout << "mc_steps: " << mc_steps << std::endl;
 
     std::ifstream main;
     main.open("W1.xsf");
@@ -203,7 +213,7 @@ int main()
     std::cout << "Size reduction factor: " << 100 * (n_tot - n_tot_new)/n_tot << "%" << std::endl;
     std::cout << "WARNING: norms after size reduction should not be far from  1!!!" << std::endl;
     
-    coulomb = compute_Coulomb(mc_sweeps, n_tot_new, W1_new, W2_new, r_new); 
+    coulomb = compute_Coulomb(mc_steps, n_tot_new, W1_new, W2_new, r_new); 
 
     std::cout << "Coulomb_U: " << coulomb[0] << " eV" << std::endl; 
     std::cout << "Coulomb_V: " << coulomb[1] << " eV" << std::endl; 

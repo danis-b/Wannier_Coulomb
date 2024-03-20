@@ -80,25 +80,25 @@ def size_reduction(W1, W2, n_size, vecs, r_center, r_cut):
 
 
 @jit(nopython=True)
-def compute_Coulomb(mc_sweeps, n_tot, W1, W2, r):
+def compute_Coulomb(mc_steps, n_tot, W1, W2, r):
 
     coulomb = np.zeros(3, dtype=float)        
-    for n in range(mc_sweeps):
-        i = random.randint(0, n_tot - 1)
-        j = random.randint(0, n_tot - 1)
+    for n in range(mc_steps):
+        i = np.random.randint(0, n_tot)
+        j = np.random.randint(0, n_tot)
         
         if(i != j):
-            coulomb[0] += (W1[i] * W1[i]) * (W1[j] * W1[j]) /np.linalg.norm(r[i] - r[j])
-            coulomb[1] += (W1[i] * W1[i]) * (W2[j] * W2[j]) /np.linalg.norm(r[i] - r[j])
-            coulomb[2] += (W1[i] * W2[i]) * (W1[j] * W2[j]) /np.linalg.norm(r[i] - r[j])
+            distance = np.linalg.norm(r[i] - r[j])
+            coulomb[0] += (W1[i] * W1[i]) * (W1[j] * W1[j]) / distance
+            coulomb[1] += (W1[i] * W1[i]) * (W2[j] * W2[j]) / distance
+            coulomb[2] += (W1[i] * W2[i]) * (W1[j] * W2[j]) / distance
      
-    
-    return  14.3948 * coulomb * (n_tot * n_tot / mc_sweeps) 
+    return  14.3948 * coulomb * (n_tot * n_tot / mc_steps) 
 
 
 def main():
 
-    mc_sweeps = 1E8
+    mc_steps = int(1E8)
     # set the center r_center for size reduction
     # set the cutoff distance to increase the accuracy of MC sampling
     # keep in mind that norm_1 and norm_2 should be close to 1 after size reduction!!!
@@ -127,7 +127,7 @@ def main():
     r_new = np.array(r_new)
     n_tot_new = r_new.shape[0] 
 
-    coulomb = compute_Coulomb(mc_sweeps, n_tot_new, W1_new, W2_new, r_new) 
+    coulomb = compute_Coulomb(mc_steps, n_tot_new, W1_new, W2_new, r_new) 
 
     print("Coulomb_U: ", '{:.4f}'.format(coulomb[0]), " eV")
     print("Coulomb_V: ", '{:.4f}'.format(coulomb[1]), " eV")
