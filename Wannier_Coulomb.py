@@ -78,6 +78,33 @@ def size_reduction(W1, W2, n_size, vecs, r_center, r_cut):
     return r_new, W1_new, W2_new 
 
 
+# For test only. Race condition problem!  
+# @jit(nopython=True, parallel=True)
+# def compute_Coulomb(mc_steps, n_tot, W1, W2, r):
+
+#     coulomb = np.zeros(3, dtype=float)
+#     for n in prange(mc_steps):
+#         local_coulomb_U = 0.0
+#         local_coulomb_V = 0.0
+#         local_coulomb_J = 0.0
+
+#         i = np.random.randint(0, n_tot)
+#         j = np.random.randint(0, n_tot)
+        
+#         if(i != j):
+#             distance = np.linalg.norm(r[i] - r[j])
+#             local_coulomb_U += (W1[i] * W1[i]) * (W1[j] * W1[j]) / distance
+#             local_coulomb_V += (W1[i] * W1[i]) * (W2[j] * W2[j]) / distance
+#             local_coulomb_J += (W1[i] * W2[i]) * (W1[j] * W2[j]) / distance
+
+
+#         coulomb[0] += local_coulomb_U
+#         coulomb[1] += local_coulomb_V
+#         coulomb[2] += local_coulomb_J
+
+#     return  14.3948 * coulomb * (n_tot * n_tot / mc_steps) 
+
+
 
 @jit(nopython=True)
 def compute_Coulomb(mc_steps, n_tot, W1, W2, r):
@@ -98,7 +125,8 @@ def compute_Coulomb(mc_steps, n_tot, W1, W2, r):
 
 def main():
 
-    mc_steps = int(1E8)
+    #play with this parameter to reach the required accuracy
+    mc_steps = int(1E7)
     # set the center r_center for size reduction
     # set the cutoff distance to increase the accuracy of MC sampling
     # keep in mind that norm_1 and norm_2 should be close to 1 after size reduction!!!

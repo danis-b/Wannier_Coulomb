@@ -34,44 +34,44 @@ auto distance(const std::array<double, N> &a, const std::array<double, N> &b)
 std::array<double, 3> compute_Coulomb(const int mc_steps, const size_t n_tot, std::vector<double> const &W1, std::vector<double> const &W2, std::vector<std::array<double, 3> > const &r)
 {
     
-    double coulomb_0 = 0.0;
-    double coulomb_1 = 0.0;
-    double coulomb_2 = 0.0;
+    double coulomb_U = 0.0;
+    double coulomb_V = 0.0;
+    double coulomb_J = 0.0;
     srand(time(NULL));
 
-    #pragma omp parallel for default(none) shared(mc_steps, n_tot, W1, W2, r) reduction(+:coulomb_0, coulomb_1, coulomb_2)
+    // #pragma omp parallel for default(none) shared(mc_steps, n_tot, W1, W2, r) reduction(+:coulomb_U, coulomb_V, coulomb_J)
     for (auto n = size_t{0}; n < mc_steps; ++n)
     {
-        double local_coulomb_0 = 0.0;
-        double local_coulomb_1 = 0.0;
-        double local_coulomb_2 = 0.0;
+        double local_coulomb_U = 0.0;
+        double local_coulomb_V = 0.0;
+        double local_coulomb_J = 0.0;
 
         int i = rand() % n_tot;
         int j = rand() % n_tot;
         if (i != j)
         {
             double d_ij = distance(r[i], r[j]);
-            local_coulomb_0 += (W1[i] * W1[i]) * (W1[j] * W1[j]) / d_ij;
-            local_coulomb_1 += (W1[i] * W1[i]) * (W2[j] * W2[j]) / d_ij;
-            local_coulomb_2 += (W1[i] * W2[i]) * (W1[j] * W2[j]) / d_ij;
+            local_coulomb_U += (W1[i] * W1[i]) * (W1[j] * W1[j]) / d_ij;
+            local_coulomb_V += (W1[i] * W1[i]) * (W2[j] * W2[j]) / d_ij;
+            local_coulomb_J += (W1[i] * W2[i]) * (W1[j] * W2[j]) / d_ij;
         }
 
-        coulomb_0 += local_coulomb_0;
-        coulomb_1 += local_coulomb_1;
-        coulomb_2 += local_coulomb_2;
+        coulomb_U += local_coulomb_U;
+        coulomb_V += local_coulomb_V;
+        coulomb_J += local_coulomb_J;
     }
 
-    coulomb_0 *= 14.3948 * (n_tot * n_tot / mc_steps);
-    coulomb_1 *= 14.3948 * (n_tot * n_tot / mc_steps);
-    coulomb_2 *= 14.3948 * (n_tot * n_tot / mc_steps);
+    coulomb_U *= 14.3948 * (n_tot * n_tot / mc_steps);
+    coulomb_V *= 14.3948 * (n_tot * n_tot / mc_steps);
+    coulomb_J *= 14.3948 * (n_tot * n_tot / mc_steps);
 
-    return {coulomb_0, coulomb_1, coulomb_2};
+    return {coulomb_U, coulomb_V, coulomb_J};
 }
 
 
 int main()
 {
-    //set MC sweeps
+    //play with this parameter to reach the required accuracy
     const int mc_steps = 1E19;
     int n_tot, n_tot_new, a, b, c;
     int n_size[3];
