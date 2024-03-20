@@ -1,4 +1,4 @@
-This script calculates the following Coulomb matrix elements using real space Wannier functions (xsf files) $W_i(\mathbf{r})$ from wannier90 using Monte Carlo sampling:
+This script calculates the following Coulomb matrix elements using real space Wannier functions (xsf files) $W_i(\mathbf{r})$ from wannier90 via Monte Carlo sampling:
 
 ```math
 U = \int d\mathbf{r} d\mathbf{r'} \frac{W_1^2(\mathbf{r}) W_1^2(\mathbf{r'})}{|\mathbf{r} - \mathbf{r'}|} 
@@ -11,7 +11,6 @@ V = \int d\mathbf{r} d\mathbf{r'} \frac{W_1^2(\mathbf{r}) W_2^2(\mathbf{r'})}{|\
 ```math
 J = \int d\mathbf{r} d\mathbf{r'} \frac{W_1(\mathbf{r}) W_2(\mathbf{r}) W_1(\mathbf{r'}) W_2(\mathbf{r'}) }{|\mathbf{r} - \mathbf{r'}|} 
 ```
-
 
 # Dependencies
 **python** version requires [numba](https://numba.pydata.org) \
