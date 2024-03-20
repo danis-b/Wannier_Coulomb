@@ -23,5 +23,5 @@ make
 
 # Usage
 Run python Wannier_Coulomb.py or Wannier_Coulomb.x in the same directory with W1.xsf and W2.xsf files from [wannier90](https://wannier.org).
-Set r_center and r_cut to reduce the size for Monte Carlo sampling, but keeping the norms of Wannier functions close to 1. 
+Play with mc_steps parameter to reach the required accuracy. Optionally set r_center and r_cut to reduce the size for Monte Carlo sampling, but keeping the norms of Wannier functions close to 1. 
 
