@@ -39,7 +39,7 @@ std::array<double, 3> compute_Coulomb(const int mc_steps, const size_t n_tot, st
     double coulomb_J = 0.0;
     srand(time(NULL));
 
-    // #pragma omp parallel for default(none) shared(mc_steps, n_tot, W1, W2, r) reduction(+:coulomb_U, coulomb_V, coulomb_J)
+    #pragma omp parallel for default(none) shared(mc_steps, n_tot, W1, W2, r) reduction(+:coulomb_U, coulomb_V, coulomb_J)
     for (auto n = size_t{0}; n < mc_steps; ++n)
     {
         double local_coulomb_U = 0.0;
