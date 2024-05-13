@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit, prange
-import random
 from datetime import datetime
+import argparse
 
 
 def xsf_parser(filename):
@@ -121,13 +121,21 @@ def main():
     print("Program Wannier_Hund.x v.2.0 starts on  ", datetime.now())
     print('=' * 69)
 
-    W1, n_size, origin, vecs = xsf_parser("W1.xsf")
-    W2, _, _, _ = xsf_parser("W2.xsf")
+    parser = argparse.ArgumentParser(prog='Wannier_Coulomb.py', usage='%(prog)s WF1.xsf WF2.xsf')
+    parser.add_argument("WF1")
+    parser.add_argument("WF2")
+    args = parser.parse_args()
+
+
+    W1, n_size, origin, vecs = xsf_parser(args.WF1)
+    W2, n_size2, origin2, vecs2 = xsf_parser(args.WF2)
+
+    assert((n_size == n_size2).all())
+    assert((origin == origin2).all())
+    assert((vecs == vecs2).all())
 
     W1 = normalize(W1)
     W2 = normalize(W2)
-
-    n_tot = np.prod(n_size)
 
     print("Dimensions are:", n_size[0], n_size[1], n_size[2])
     print("Origin is:", '{:.3f}'.format(origin[0]), '{:.3f}'.format(origin[1]), '{:.3f}'.format(origin[2]))
