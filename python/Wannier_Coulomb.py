@@ -71,7 +71,7 @@ def size_reduction(W1, W2, n_size, vecs, r_center, r_cut):
     W2_new = np.array(W2_new)
     
     n_tot_new = W1_new.shape[0]  
-    print("Size reduction  leads to W1 and W2 norms: ", norm_1, norm_2 )
+    print("Size reduction leads to W1 and W2 norms: ", round(norm_1, 3), round(norm_2, 3))
     print("Size reduction factor: ", int(100 * (n_tot - n_tot_new)/n_tot), "%")
     print("WARNING: norms after size reduction should not be far from  1!!!")
             
@@ -120,6 +120,8 @@ def main():
 
     print("Program Wannier_Hund.x v.2.0 starts on  ", datetime.now())
     print('=' * 69)
+    
+    print("mc_steps: ", mc_steps)
 
     parser = argparse.ArgumentParser(prog='Wannier_Coulomb.py', usage='%(prog)s WF1.xsf WF2.xsf')
     parser.add_argument("WF1")
